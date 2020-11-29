@@ -35,7 +35,7 @@ namespace GachiFighting.Matchmaking
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<ChatHub>("/chat");
+                endpoints.MapHub<GameHub>("/game");
             });
         }
     }
