@@ -64,10 +64,11 @@ class GameSession {
     drawFrames5sec() {
         const framesToDraw = Object
             .values(this.frames)
-            .slice(-5, -1);
+            .slice(1, -1)
+            .slice(0, 5);
 
         const framesToDrawSummarized = framesToDraw.reduce((value, storage) => storage += value, 0);
-        document.getElementById('delay5' + this.blockId).innerText = Math.round(framesToDrawSummarized / framesToDraw.length);
+        document.getElementById('delay5' + this.blockId).innerText = framesToDrawSummarized / framesToDraw.length;
     }
 
     _handeFrames() {
