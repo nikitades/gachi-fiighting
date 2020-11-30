@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using GachiFighting.Matchmaking.Game.Exception;
 
 namespace GachiFighting.Matchmaking.Game
@@ -62,7 +63,7 @@ namespace GachiFighting.Matchmaking.Game
         private void Run()
         {
             gameLoop = new GameLoop(Player1, Player2);
-            gameLoop.Start();
+            Task.Run(async () => await gameLoop.Start());
         }
     }
 }

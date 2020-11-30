@@ -10,7 +10,7 @@ namespace GachiFighting.Matchmaking.Game
 {
     public class GameLoop
     {
-        private const int delay = 1000 / 60 - 2;
+        private const double delay = 16.66666667;
 
         public bool Running { get; set; }
         public Player Player1 { get; set; }
@@ -30,18 +30,32 @@ namespace GachiFighting.Matchmaking.Game
         public async Task Start()
         {
             Running = true;
-            var elapsedTicks = (double)Environment.TickCount;
-            var lastSeconds = new SortedDictionary<int, int>();
+            double elapsedTicks = Environment.TickCount;
             while (Running)
             {
-                if (Environment.TickCount >= elapsedTicks)
-                {
-                    Player1.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
-                    Player2.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
-                    var ticksLag = Environment.TickCount - elapsedTicks;
-                    elapsedTicks = Environment.TickCount + 16.65 - ticksLag;
-                }
+                if (Environment.TickCount < elapsedTicks) continue;
+                Player1.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
+                Player2.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
+                Thread.Sleep(getTimeToSleep(elapsedTicks)); //leave 1msec to catch exactly 60fps
+                elapsedTicks += GameLoop.delay;
             }
+        }
+
+        private int getTimeToSleep(double elapsedTicks)
+        {
+            var operationTime = Environment.TickCount - elapsedTicks;
+            var timeToSleep = GameLoop.delay - operationTime + getElapsedTimeModulo(elapsedTicks);
+            if (timeToSleep > 0)
+            {
+                return (int)Math.Round(timeToSleep);
+            }
+
+            return 0;
+        }
+
+        private double getElapsedTimeModulo(double elapsedTime)
+        {
+            return Math.Round(elapsedTime) % 1;
         }
     }
 }
