@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using GachiFighting.Matchmaking.Game;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace GachiFighting.Matchmaking
 {
@@ -25,6 +21,9 @@ namespace GachiFighting.Matchmaking
                         .AllowCredentials();
                 });
             });
+
+            services.AddSingleton(new PlayerRegistry());
+            services.AddSingleton(new GameRegistry());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

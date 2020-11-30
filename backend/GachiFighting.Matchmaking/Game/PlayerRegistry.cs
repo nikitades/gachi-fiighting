@@ -1,24 +1,38 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.SignalR;
 
-namespace GachiFighting
+namespace GachiFighting.Matchmaking.Game
 {
-    public static class PlayerRegistry
+    public class PlayerRegistry
     {
-        private static List<string> connectedUsers = new List<string>();
+        private ConcurrentDictionary<string, Player> players = new ConcurrentDictionary<string, Player>();
 
-        public static void Add(string playerName)
+        public void Register(string connectionId, Player player)
         {
-            connectedUsers.Add(playerName);
+            players.TryAdd(connectionId, player);
         }
 
-        public static void Remove(string playerName)
+        public void Remove(string connectionId)
         {
-            connectedUsers.Remove(playerName);
+            Player player;
+            players.TryRemove(connectionId, out player);
         }
 
-        public static int Total()
+        public Player Get(string connectionId)
         {
-            return connectedUsers.Count;
+            Player player;
+            if (!players.TryGetValue(connectionId, out player))
+            {
+                return null;
+            }
+
+            return player;
+        }
+
+        public int Total()
+        {
+            return players.Count;
         }
     }
 }

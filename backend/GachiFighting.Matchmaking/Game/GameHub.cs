@@ -1,30 +1,39 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-namespace GachiFighting.Matchmaking
+namespace GachiFighting.Matchmaking.Game
 {
     public class GameHub : Hub
     {
-        public override async Task OnConnectedAsync()
+        public GameRegistry GameRegistry { get; set; }
+        public PlayerRegistry PlayerRegistry { get; set; }
+
+        public GameHub(GameRegistry gameRegistry, PlayerRegistry playerRegistry) : base()
         {
-            PlayerRegistry.Add(getPlayerId());
-            if (PlayerRegistry.Total() == 2)
-            {
-                GameLoop.Loop(Clients);
-            }
+            GameRegistry = gameRegistry;
+            PlayerRegistry = playerRegistry;
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnConnectedAsync()
         {
-            PlayerRegistry.Remove(getPlayerId());
+            var player = new Player(getPlayerNameFromQuery(), Context.ConnectionId, Clients.Caller);
+            PlayerRegistry.Register(Context.ConnectionId, player);
+            GameRegistry.GetTempGame().AddPlayer(player);
+            Console.WriteLine($"Player connected: {player.Name}");
+        }
+
+        public override Task OnDisconnectedAsync(System.Exception? exception)
+        {
+            var playerToRemove = PlayerRegistry.Get(Context.ConnectionId);
+            PlayerRegistry.Remove(Context.ConnectionId);
+            GameRegistry.GetTempGame().RemovePlayer(Context.ConnectionId);
+            Console.WriteLine($"Player removed: {playerToRemove.Name}");
             return base.OnDisconnectedAsync(exception);
         }
 
-        private string getPlayerId()
+        private string getPlayerNameFromQuery()
         {
-            return Context.GetHttpContext().Request.Query["user"];
+            return Context.GetHttpContext().Request.Query["playerName"];
         }
     }
 }
