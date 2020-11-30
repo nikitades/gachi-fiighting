@@ -34,8 +34,8 @@ namespace GachiFighting.Matchmaking.Game
             while (Running)
             {
                 if (Environment.TickCount < elapsedTicks) continue;
-                Player1.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
-                Player2.Caller.SendAsync("Send", $"New game state! {DateTime.Now.ToString()}");
+                Player1.Caller.SendAsync("Send", Player2.GetInputClearing());
+                Player2.Caller.SendAsync("Send", Player1.GetInputClearing());
                 Thread.Sleep(getTimeToSleep(elapsedTicks)); //leave 1msec to catch exactly 60fps
                 elapsedTicks += GameLoop.delay;
             }

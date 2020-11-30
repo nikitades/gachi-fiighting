@@ -24,7 +24,7 @@ namespace GachiFighting.Matchmaking.Game
             Player player;
             if (!players.TryGetValue(connectionId, out player))
             {
-                return null;
+                throw new UserNotFoundException($"User conn {connectionId} was not found");
             }
 
             return player;

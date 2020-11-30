@@ -34,7 +34,7 @@ namespace GachiFighting.Matchmaking.Game
 
             if (!playerWasSet && Player1 != null && Player2 != null)
             {
-                throw new CantAddMorePlayersException();
+                throw new CantAddMorePlayersException("All slots are taken.");
             }
 
             if (Player1 != null && Player2 != null)

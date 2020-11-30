@@ -14,6 +14,16 @@ namespace GachiFighting.Matchmaking.Game
             PlayerRegistry = playerRegistry;
         }
 
+        public async void UserInput(string[] input)
+        {
+            var player = PlayerRegistry.Get(Context.ConnectionId);
+            if (null == player) return;
+            foreach (var btn in input)
+            {
+                player.Input.Add(btn);
+            }
+        }
+
         public override async Task OnConnectedAsync()
         {
             var player = new Player(getPlayerNameFromQuery(), Context.ConnectionId, Clients.Caller);

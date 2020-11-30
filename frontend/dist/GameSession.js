@@ -7,6 +7,8 @@ class GameSession {
     lastReceivedAt = new Date();
     delays = [];
     frames = {};
+    sentFrames = {};
+    lastOutputFrameSentAt = new Date();
 
     constructor(blockId, playerName) {
         this.blockId = blockId;
@@ -19,6 +21,7 @@ class GameSession {
     async start() {
         try {
             await this.connection.start();
+            this.loopData();
             this.drawLogs(`Connected player ${this.playerName} to a game ${this.gameId}`);
         } catch (err) {
             this.drawLogs(err);
@@ -87,5 +90,45 @@ class GameSession {
             .withUrl(`http://0.0.0.0:5000/game?gameId=${gameId}&playerName=${playerName}`)
             .configureLogging(signalR.LogLevel.Information)
             .build();
+    }
+
+    async loopData() {
+        window.requestAnimationFrame(this.loopData.bind(this));
+        if (this.connection.state === signalR.HubConnectionState.Connected) {
+            this.connection.invoke("UserInput", ["a", "b", "c", "d"].sort((a, b) => Math.round(Math.random())));
+            this._handleSentFrames();
+            this.drawSentFrames();
+            this.drawSentFrames5sec();
+        }
+    }
+
+    _handleSentFrames() {
+        const curSecond = new Date().getTime().toString().slice(0, -3);
+        if (!this.sentFrames[curSecond]) {
+            this.sentFrames[curSecond] = 0;
+        }
+        if (Object.values(this.sentFrames).length > 120) {
+            delete this.sentFrames[Object.keys(this.sentFrames)[0]];
+        }
+        this.sentFrames[curSecond]++;
+    }
+
+    drawSentFrames() {
+        const framesToDraw = Object
+            .values(this.sentFrames)
+            .slice(1, -1);
+
+        const framesToDrawSummarized = framesToDraw.reduce((value, storage) => storage += value, 0);
+        document.getElementById('sentDelay' + this.blockId).innerText = Math.round(framesToDrawSummarized / framesToDraw.length);
+    }
+
+    drawSentFrames5sec() {
+        const framesToDraw = Object
+            .values(this.sentFrames)
+            .slice(1, -1)
+            .slice(0, 5);
+
+        const framesToDrawSummarized = framesToDraw.reduce((value, storage) => storage += value, 0);
+        document.getElementById('sentDelay5' + this.blockId).innerText = framesToDrawSummarized / framesToDraw.length;
     }
 }
